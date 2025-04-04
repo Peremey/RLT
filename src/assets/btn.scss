@@ -1,0 +1,31 @@
+.btn--close {
+    position: absolute;
+    cursor: pointer;
+    top: 6px;
+    right: 6px;
+    width: 24px;
+    height: 24px;
+    border-radius: 20%;
+
+    div:nth-last-child(1) {
+        transform: rotateZ(-45deg);
+    }
+    div {
+        padding: 0;
+        $h: 2px;
+        $w: 14px;
+        position: absolute;
+        height: 2px;
+        width: 14px;
+        top: calc(50% - #{$h} / 2);
+        left: calc(50% - #{$w} / 2);
+        background-color: white;
+        transform: rotateZ(45deg);
+        transition: background-color 0.5s ease-in-out;
+    }
+    &:hover {
+        div {
+            background-color: Red;
+        }
+    }
+}

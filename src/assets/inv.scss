@@ -1,0 +1,141 @@
+@import "btn";
+@import "deleteItem";
+
+.inv {
+    $cell-w: 105px;
+    $cell-h: 100px;
+    $height-i: calc(var(--items-y) * #{$cell-h});
+    $width-i: calc(var(--items-x) * #{$cell-w});
+
+    display: grid;
+    grid-template-areas: "left items" "footer footer";
+    grid-template-columns: 200px $width-i;
+    grid-template-rows: $height-i auto;
+    gap: 10px;
+    color: White;
+    background-color: #1d1d1d;
+
+    padding: 20px;
+    width: fit-content;
+    position: relative;
+    &--block {
+        background-color: var(--secondary-bg);
+        border-radius: 10px;
+        border: solid 1px var(--b-color);
+        padding: 10px;
+    }
+    &--items {
+        display: grid;
+        grid-template-columns: repeat(var(--items-x), #{$cell-w});
+        grid-template-rows: repeat(var(--items-y), #{$cell-h});
+
+        gap: 1px;
+        flex-wrap: wrap;
+        background-color: var(--b-color);
+        padding: 0px !important;
+        overflow: hidden;
+        position: relative;
+    }
+    &--item {
+        background-color: #2f2f2f;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    &--footer {
+        grid-column: footer;
+    }
+    &--dropicon {
+        opacity: 0;
+        position: absolute;
+        width: calc(#{$cell-w} * 0.5);
+        height: calc(#{$cell-h} * 0.5);
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        &-active {
+            opacity: 1;
+            animation: pulse 1s ease infinite;
+        }
+        @keyframes pulse {
+            0% {
+                transform: translate(-50%, -50%) scale(1, 1);
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.1, 1.1);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1, 1);
+            }
+        }
+    }
+    &--delete {
+        width: 220px;
+        height: $height-i;
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+}
+.item {
+    position: relative;
+    &--icon {
+        width: 50%;
+        height: 50%;
+        cursor: pointer;
+    }
+    &--count {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        background-color: var(--secondary-bg);
+        width: 20px;
+        height: 20px;
+        border-top-left-radius: 10px;
+        border-left: solid var(--b-color) 1px;
+        border-top: solid var(--b-color) 1px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 60%;
+    }
+}
+.person {
+    display: flex;
+    flex-direction: column;
+    img {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+    &--name {
+        color: Red;
+        text-align: center;
+        font-weight: bold;
+        font-size: 110%;
+        margin-top: 10px;
+    }
+    &--desc {
+        margin-top: 10px;
+        overflow-y: auto;
+        padding: 8px;
+    }
+}
+.footer {
+    height: 38px;
+    position: relative;
+    &--wrapper {
+        width: 90%;
+        padding: 8px;
+        overflow-y: auto;
+        height: 30px;
+    }
+    &--content {
+        font-size: 85%;
+    }
+}
+
+.dragging {
+    &--moved {
+        opacity: 0;
+    }
+}
