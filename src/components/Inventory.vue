@@ -7,8 +7,8 @@
             <div class="person--desc">{{ person.desc }}</div>
         </div>
         <div class="inv--items inv--block">
-            <div class="inv--item item dragging" v-for="index of parameters.count()" :key="index"
-                @dragover.prevent="onDragOver" @touchmove.prevent="onTouchMove" @touchend="onTouchEnd($event, index)"
+            <div class="inv--item item dragging" v-for="index of parameters.count()" :key="index" :data-index="index"
+                @dragover.prevent="onDragOver" @touchmove.prevent="onTouchMove" @touchend="onTouchEnd($event)"
                 @drop="onDrop($event, index)">
                 <template v-if="inv?.hasItem(index)">
                     <img :src="inv.getItem(index)!.icon" class="item--icon" draggable="true"
@@ -36,6 +36,7 @@ import { useInventories } from '@/store/inventories'
 import type { IFooter, IInventoryParameters, IPerson } from '@/BL/types'
 import { ref } from 'vue';
 
+
 const props = defineProps<{
     parameters: IInventoryParameters
     person: IPerson
@@ -58,37 +59,10 @@ const deleteItemSubmit = (count: number) => {
     selectedIndex.value = -1
 }
 
+// draggable logic
 const dragIndex = ref<number | null>(null)
 const dragIcon = ref<HTMLElement>()
 const parentDragIcon = ref<HTMLElement>()
-
-const breakDrop = () => {
-    clearDraggable()
-}
-const breakDropTouch = (event: TouchEvent) => {
-    const touch = event.changedTouches[0];
-    const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
-
-    if (!targetElement?.closest('.inv')) {
-        clearDraggable()
-    }
-
-}
-
-const onDragStart = (event: DragEvent, index: number) => {
-    if (!event.dataTransfer)
-        return
-    dragStart(event, index)
-
-    const img = new Image()
-    img.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiLz4='
-    event.dataTransfer.setDragImage(img, 0, 0)
-    event.dataTransfer.effectAllowed = 'move'
-}
-
-const onTouchStart = (event: TouchEvent, index: number) => {
-    dragStart(event, index)
-}
 
 const dragStart = (event: DragEvent | TouchEvent, index: number) => {
     dragIndex.value = index;
@@ -103,7 +77,6 @@ const dragStart = (event: DragEvent | TouchEvent, index: number) => {
     dragIcon.value = icon
     parentDragIcon.value = inv
 }
-
 const setDropIconPosition = (event: DragEvent | TouchEvent, el: HTMLElement, parent: HTMLElement) => {
     const clientRect = parent.getBoundingClientRect()
     let X, Y;
@@ -117,43 +90,69 @@ const setDropIconPosition = (event: DragEvent | TouchEvent, el: HTMLElement, par
     el.style.left = X + "px"
     el.style.top = Y + "px"
 }
-
-
-const dragOver = (event: DragEvent | TouchEvent) => {
-    setDropIconPosition(event, dragIcon.value!, parentDragIcon.value!)
-}
-
-const onDragOver = (event: DragEvent) => {
-    dragOver(event)
-}
-
-const onTouchMove = (event: TouchEvent) => {
-    dragOver(event)
-};
-
-
-const onDrop = (event: DragEvent, index: number) => {
-    dragEnd(event, index)
-}
-const onTouchEnd = (event: TouchEvent, index: number) => {
-    dragEnd(event, index)
-}
-
-const dragEnd = (event: DragEvent | TouchEvent, index: number) => {
-    (event.target as HTMLElement).classList.remove(`selected`)
+const dragEnd = (index: number) => {
     if (dragIndex.value == undefined)
         return new Error(`dragIndex empty for ${index}`)
     inv.value!.setMoveItem(dragIndex.value, index)
     saveInventories()
     clearDraggable()
 }
-
 const clearDraggable = () => {
     if (dragIcon.value != undefined) {
         dragIcon.value.classList.remove("inv--dropicon-active")
         dragIndex.value = null
     }
 
+}
+
+// drag & drop events listeners
+const breakDrop = () => {
+    clearDraggable()
+}
+const onDragStart = (event: DragEvent, index: number) => {
+    if (!event.dataTransfer)
+        return
+    dragStart(event, index)
+
+    const img = new Image()
+    img.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiLz4='
+    event.dataTransfer.setDragImage(img, 0, 0)
+    event.dataTransfer.effectAllowed = 'move'
+}
+const dragOver = (event: DragEvent | TouchEvent) => {
+    setDropIconPosition(event, dragIcon.value!, parentDragIcon.value!)
+}
+const onDragOver = (event: DragEvent) => {
+    dragOver(event)
+}
+const onDrop = (event: DragEvent, index: number) => {
+    dragEnd(index)
+}
+
+// touch events listeners
+const breakDropTouch = (event: TouchEvent) => {
+    const touch = event.changedTouches[0];
+    const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
+    if (!targetElement?.closest('.inv')) {
+        clearDraggable()
+    }
+}
+const onTouchStart = (event: TouchEvent, index: number) => {
+    dragStart(event, index)
+}
+const onTouchMove = (event: TouchEvent) => {
+    dragOver(event)
+}
+const onTouchEnd = (event: TouchEvent) => {
+    const touch = event.changedTouches[0]
+    const elements = document.elementsFromPoint(touch.clientX, touch.clientY);
+    const touchElement = elements.find(el => el.hasAttribute('data-index'));
+    if (touchElement) {
+        const index = Number((touchElement as HTMLElement).getAttribute('data-index'));
+        if (!isNaN(index)) {
+            dragEnd(index)
+        }
+    }
 }
 
 </script>
